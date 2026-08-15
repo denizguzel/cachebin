@@ -68,6 +68,19 @@ pub fn run() {
             _ => {}
         })
         .on_window_event(|window, event| {
+            if window.label() == "tray-popup" {
+                if let tauri::WindowEvent::Focused(false) = event {
+                    let popup = window.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(120));
+                        if !popup.is_focused().unwrap_or(false) {
+                            let _ = popup.hide();
+                        }
+                    });
+                    return;
+                }
+            }
+
             // Closing the window hides it to the system tray instead of quitting.
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();

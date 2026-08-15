@@ -2,10 +2,12 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AppHeader } from '@/components/AppHeader';
 import { AppSidebar } from '@/components/AppSidebar';
+import { CompactPopup } from '@/components/CompactPopup';
 import { PageFallback } from '@/components/PageFallback';
 import { TitleBar } from '@/components/TitleBar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/sonner';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { viewCopy } from '@/data/dashboard';
 import { useHistory } from '@/hooks/useHistory';
 import { useScan } from '@/hooks/useScan';
@@ -24,7 +26,14 @@ const PlaceholderView = lazy(() =>
   import('@/components/PlaceholderView').then((m) => ({ default: m.PlaceholderView })),
 );
 
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
 function App() {
+  const label = isTauri ? getCurrentWindow().label : 'main';
+  return label === 'tray-popup' ? <CompactPopup /> : <MainApp />;
+}
+
+function MainApp() {
   const [activeView, setActiveView] = useState<View>('overview');
   const [cacheCategory, setCacheCategory] = useState('all');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
