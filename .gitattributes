@@ -1,0 +1,22 @@
+# Normalize all text files to LF in the working tree and repository,
+# regardless of core.autocrlf, so line endings stay consistent across platforms.
+* text=auto eol=lf
+
+# Files that must stay LF.
+*.sh text eol=lf
+
+# Explicitly binary files (never run through line-ending conversion).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
