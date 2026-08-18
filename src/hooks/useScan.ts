@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
+import { useOnChange } from '@/hooks/useOnChange';
 import { useTauriQuery } from '@/hooks/useTauriQuery';
 import { formatBytes } from '@/lib/format';
 import type { CachedScan } from '@/types/cached-scan';
@@ -18,12 +19,15 @@ export function useScan() {
   const [lastScanAt, setLastScanAt] = useState<Date | null>(null);
   const [isScanning, setIsScanning] = useState(false);
 
-  useEffect(() => {
-    if (cachedQuery.data) {
-      setResult(cachedQuery.data.result);
-      setLastScanAt(new Date(cachedQuery.data.scannedAt));
-    }
-  }, [cachedQuery.data]);
+  useOnChange({
+    value: cachedQuery.data,
+    onNext: (cached) => {
+      if (cached) {
+        setResult(cached.result);
+        setLastScanAt(new Date(cached.scannedAt));
+      }
+    },
+  });
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;

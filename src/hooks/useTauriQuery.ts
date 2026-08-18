@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { invoke, type InvokeArgs } from '@tauri-apps/api/core';
+import { useOnChange } from '@/hooks/useOnChange';
 
 const inFlight = new Map<string, Promise<unknown>>();
 
@@ -34,30 +35,36 @@ export function useTauriQuery<TArgs extends InvokeArgs | undefined, TResult>({
   const [isPending, setIsPending] = useState(enabled);
   const [isFetching, setIsFetching] = useState(false);
   const [requestId, setRequestId] = useState(0);
+  const requestKey = `${command}:${JSON.stringify(args ?? null)}:${requestId}:${enabled}`;
+
+  useOnChange({
+    value: enabled,
+    onNext: (next) => {
+      if (!next) {
+        setIsPending(false);
+        setIsFetching(false);
+      }
+    },
+  });
+
+  useOnChange({
+    value: requestKey,
+    onNext: () => {
+      if (enabled) {
+        setIsPending(true);
+        setIsFetching(true);
+      }
+    },
+  });
 
   useEffect(() => {
     if (!enabled) {
-      setIsPending(false);
       return;
     }
 
     let active = true;
-    setIsPending(true);
-    setIsFetching(true);
 
-    let promise: Promise<TResult>;
-    try {
-      promise = dedupeInvoke(command, args) as Promise<TResult>;
-    } catch (err) {
-      if (active) {
-        setError(err);
-        setIsFetching(false);
-        setIsPending(false);
-      }
-      return () => {
-        active = false;
-      };
-    }
+    const promise = dedupeInvoke(command, args) as Promise<TResult>;
 
     void promise
       .then((result) => {

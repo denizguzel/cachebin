@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { useOnChange } from '@/hooks/useOnChange';
 import { useTauriQuery } from '@/hooks/useTauriQuery';
 import type { Settings } from '@/types/settings';
 
@@ -8,9 +9,10 @@ export function useSettings() {
   const optionsQuery = useTauriQuery<undefined, string[]>({ command: 'get_scan_dir_options' });
   const [settings, setSettings] = useState<Settings | null>(null);
 
-  useEffect(() => {
-    setSettings((prev) => prev ?? settingsQuery.data);
-  }, [settingsQuery.data]);
+  useOnChange({
+    value: settingsQuery.data,
+    onNext: (data) => setSettings((prev) => prev ?? data),
+  });
 
   const update = async (next: Settings) => {
     const saved = await invoke<Settings>('update_settings', { settings: next });

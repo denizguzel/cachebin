@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { LocalDataSection } from '@/components/LocalDataSection';
@@ -6,6 +6,7 @@ import { PreferencesSection } from '@/components/PreferencesSection';
 import { ScanLocationsSection } from '@/components/ScanLocationsSection';
 import { WslDistrosSection } from '@/components/WslDistrosSection';
 import { Button } from '@/components/ui/button';
+import { useOnChange } from '@/hooks/useOnChange';
 import { useTauriQuery } from '@/hooks/useTauriQuery';
 import type { PlatformInfo } from '@/types/platform-info';
 import type { RiskLevel } from '@/types/risk-level';
@@ -23,11 +24,14 @@ export function SettingsPage({ settings, scanDirOptions, onUpdate, onClearHistor
   const [draft, setDraft] = useState<Settings | null>(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (settings && draft === null) {
-      setDraft(settings);
-    }
-  }, [settings, draft]);
+  useOnChange({
+    value: settings,
+    onNext: (next) => {
+      if (draft === null && next) {
+        setDraft(next);
+      }
+    },
+  });
 
   if (draft === null) {
     return (

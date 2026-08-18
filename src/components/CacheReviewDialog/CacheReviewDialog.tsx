@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { RiskyWarning } from '@/components/RiskyWarning';
 import { ReviewItemList } from '@/components/ReviewItemList';
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { formatBytes } from '@/lib/format';
+import { useOnChange } from '@/hooks/useOnChange';
 import type { CleanupProgress } from '@/hooks/useCleanup';
 import type { ReviewItem } from '@/types/review-item';
 
@@ -29,9 +30,14 @@ export function CacheReviewDialog({ open, items, progress, onClose, onConfirm }:
   const totalBytes = items.reduce((sum, item) => sum + item.sizeBytes, 0);
   const hasRisky = items.some((item) => item.risk === 'risky');
 
-  useEffect(() => {
-    if (open) setRiskAcknowledged(false);
-  }, [open]);
+  useOnChange({
+    value: open,
+    onNext: (next) => {
+      if (next) {
+        setRiskAcknowledged(false);
+      }
+    },
+  });
 
   const handleConfirm = async () => {
     setConfirming(true);

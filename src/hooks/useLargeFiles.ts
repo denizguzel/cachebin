@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+import { useOnChange } from '@/hooks/useOnChange';
 import { useTauriQuery } from '@/hooks/useTauriQuery';
 import type { CachedLargeFiles } from '@/types/cached-large-files';
 import type { LargeFile } from '@/types/large-file';
@@ -13,18 +14,19 @@ export function useLargeFiles() {
   const [scannedAt, setScannedAt] = useState<Date | null>(null);
   const [isScanning, setIsScanning] = useState(false);
 
-  useEffect(() => {
-    const cached = cachedQuery.data;
-    if (!cached) return;
-
-    if (cached.status === 'scanning') {
-      setIsScanning(true);
-    } else {
-      setIsScanning(false);
-      setFiles(cached.files);
-      setScannedAt(new Date(cached.scannedAt));
-    }
-  }, [cachedQuery.data]);
+  useOnChange({
+    value: cachedQuery.data,
+    onNext: (cached) => {
+      if (!cached) return;
+      if (cached.status === 'scanning') {
+        setIsScanning(true);
+      } else {
+        setIsScanning(false);
+        setFiles(cached.files);
+        setScannedAt(new Date(cached.scannedAt));
+      }
+    },
+  });
 
   // A scan started before a page refresh keeps running in the backend; poll the cache file
   // until it flips back to ready so the in-progress state survives reloads.

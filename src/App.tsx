@@ -62,7 +62,10 @@ function MainApp() {
   };
 
   const handleScanRef = useRef(handleScan);
-  handleScanRef.current = handleScan;
+
+  useEffect(() => {
+    handleScanRef.current = handleScan;
+  });
 
   useEffect(() => {
     if (settings?.autoScanOnStartup && !autoScanned.current) {

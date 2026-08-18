@@ -61,3 +61,14 @@ jobs:
           releaseDraft: true
           prerelease: false
           packageManager: bun
+
+      - name: Upload portable exe to release
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          $portable = "Cachebin_${version}_x64_portable.exe"
+          Copy-Item "src-tauri/target/release/cachebin.exe" $portable
+          gh release upload "${{ github.ref_name }}" $portable --clobber
